@@ -20,11 +20,11 @@ in
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
-    
+  home.packages = with pkgs; [
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
+  
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -69,12 +69,21 @@ in
     EDITOR = "nvim";
   };
 
+  # configure git with my defaults
   programs.git = {
     enable = true;
     userName = "Eric Yen";
     userEmail = "eric@ericyen.com";
     aliases = {
       prettylog = "...";
+    };
+    delta = {
+      enable = true;
+      options = {
+        navigate = true;
+        line-numbers = true;
+        syntax-theme = "GitHub";
+      };
     };
     extraConfig = {
       core = {
