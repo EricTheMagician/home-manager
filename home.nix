@@ -105,6 +105,27 @@ in
     ignores = [
       ".DS_Store"
       "*.pyc"
+      "\..*swp" # swap files
+      "*.o"
+    ];
+  };
+  
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    vimAlias = true;
+    defaultEditor = true;
+    coc = {
+       enable = true;
+    };
+    extraConfig = ''
+      set number relativenumber
+    '';
+    plugins = with pkgs.vimPlugins; [
+      vim-surround
+      vim-gitgutter
+      nerdtree
+      ctrlp-vim
     ];
   };
 
