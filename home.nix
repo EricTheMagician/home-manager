@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   # this will allow the unstable packages to use the same config as on the stable
   unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
@@ -17,6 +17,7 @@ in
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
   home.stateVersion = "23.05"; # Please read the comment before changing.
+  nixpkgs.config.allowUnfree = true;
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -38,6 +39,15 @@ in
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
+    unstable.vivaldi
+    unstable.vivaldi-ffmpeg-codecs
+    unstable.gitui
+    unstable.vscode.fhs
+    unstable.rclone
+    btop
+    dua
+    byobu
+    tmux
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -123,6 +133,7 @@ in
       nnoremap <C-t> :NERDTreeToggle<CR>
       nnoremap <C-p> :CtrlP<CR>
       set shell=/bin/bash
+      set mouse-=a
     '';
     plugins = with pkgs.vimPlugins; [
       vim-surround
