@@ -120,6 +120,9 @@ in
     };
     extraConfig = ''
       set number relativenumber
+      nnoremap <C-t> :NERDTreeToggle<CR>
+      nnoremap <C-p> :CtrlP<CR>
+      set shell=/bin/bash
     '';
     plugins = with pkgs.vimPlugins; [
       vim-surround
