@@ -131,15 +131,15 @@ in
     extraConfig = ''
       set number relativenumber
       nnoremap <C-t> :NERDTreeToggle<CR>
-      nnoremap <C-p> :CtrlP<CR>
+      nnoremap <C-p> :FZF<CR>
       set shell=/bin/bash
-      set mouse-=a
+      set mouse=
     '';
     plugins = with pkgs.vimPlugins; [
       vim-surround
       vim-gitgutter
       nerdtree
-      ctrlp-vim
+      fzfWrapper
     ];
   };
 
