@@ -42,7 +42,52 @@ in
     unstable.vivaldi
     unstable.vivaldi-ffmpeg-codecs
     unstable.gitui
-    unstable.vscode.fhs
+    # unstable.vscode.fhs
+    # vscode
+    (
+      vscode-with-extensions.override 
+      {
+        vscodeExtensions = with unstable.vscode-extensions; 
+        [
+
+          # generatl development related packages
+          ms-vscode-remote.remote-ssh
+          eamodio.gitlens
+          # ms-vscode.powershell
+          # ms-azuretools.vscode-docker
+
+
+          # python related packages
+          ms-python.python
+          ms-python.vscode-pylance
+          
+          # C++ related packages
+          ms-vscode.cpptools
+          ms-vscode.cmake-tools
+          xaver.clang-format
+
+          # nix related packages
+          bbenoist.nix
+          arrterian.nix-env-selector
+          jnoortheen.nix-ide
+        ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace 
+        [
+          {
+            publisher = "mjcrouch";
+            name = "perforce";
+            version = "4.15.7";
+            sha256 = "sha256-BXBfxg2GrXvohvu2b02JqtxbGxPxSanNId6DQ39akHI=";
+          }
+          {
+            publisher = "ms-python";
+            name = "black-formatter";
+            version ="2023.5.12151008";
+            sha256 = "sha256-YBcyyE9Z2eL914J8I97WQW8a8A4Ue6C0pCUjWRRPcr8=";
+          }
+        ];
+      }
+    )
+
     unstable.rclone
     unstable.obsidian
     unstable.nextcloud-client
@@ -57,7 +102,33 @@ in
     enable = true;
     # interactiveShellInit = '''';
     # loginShellInit = '''';
+  };
+
+  programs.ssh = {
+    enable = true;
+    matchBlocks = {
+      "headscale" = {
+        host = "100.64.0.1";
+        user = "root";
+      };
+
+      "vscode-server-unraid" = {
+        hostname = "100.64.0.11";
+        user = "eric";
+      };
+
+      "office" = {
+        hostname = "192.168.0.37";
+        user = "eric";
+      };
+
+      "ors-ftp3" = {
+        hostname = "192.168.0.25";
+        user = "root";
+      };
+
     };
+  };
 
 #  home.file.".config/fish/config.fish".text = ''
 ## fish configuration added by home-manager
