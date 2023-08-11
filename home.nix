@@ -44,6 +44,9 @@ in
     unstable.gitui
     unstable.vscode.fhs
     unstable.rclone
+    unstable.obsidian
+    unstable.nextcloud-client
+    # unstable.viber
     btop
     dua
     byobu
