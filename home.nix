@@ -44,14 +44,30 @@ in
     unstable.gitui
     unstable.vscode.fhs
     unstable.rclone
-    unstable.obsidian
-    unstable.nextcloud-client
-    # unstable.viber
     btop
     dua
     byobu
     tmux
   ];
+
+  programs.fish = {
+    enable = true;
+    # interactiveShellInit = '''';
+    # loginShellInit = '''';
+    };
+
+#  home.file.".config/fish/config.fish".text = ''
+## fish configuration added by home-manager
+#export MAMBA_ROOT_PREFIX=/home/eric/.config/mamba
+#if status is-interactive
+#  # Commands to run in interactive sessions can go here
+#
+#  export CONDA_EXE=$MAMBA_ROOT_PREFIX/bin/conda
+#  # This uses the type -q command to check if micromamba is in the PATH. If it is, it will run the eval command to set up the micromamba shell hook for fish. The -s fish part tells it to generate code for the fish shell.
+#  eval "$(micromamba shell hook -s fish)" 
+#  alias ca "python --version" 
+#end
+#'';
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
@@ -80,6 +96,7 @@ in
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
     EDITOR = "nvim";
+    WORLD = "hello";
   };
 
   # configure git with my defaults
@@ -121,6 +138,10 @@ in
       "\..*swp" # swap files
       "*.o"
     ];
+  };
+
+  programs.bash = {
+    enable = false;
   };
   
   programs.neovim = {
