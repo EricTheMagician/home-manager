@@ -42,7 +42,6 @@ in
     # '')
     unstable.vivaldi
     unstable.vivaldi-ffmpeg-codecs
-    unstable.gitui
     # unstable.vscode.fhs
     # vscode
     # (
@@ -124,6 +123,11 @@ in
     enable = true;
     package = pkgs.vscode.fhs;
   };
+
+  programs = {
+    gitui.enable = true;
+  }
+
 
   programs.ssh = {
     enable = true;
