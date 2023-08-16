@@ -2,9 +2,8 @@
 let
   # this will allow the unstable packages to use the same config as on the stable
   unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
-  autostartPrograms = [ pkgs.slack pkgs.zoom pkgs.vivaldi pkgs.thunderbird ]; 
-in 
-{
+  autostartPrograms = [ pkgs.slack pkgs.zoom pkgs.vivaldi pkgs.thunderbird ];
+in {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "eric";
@@ -26,7 +25,6 @@ in
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
-  
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -42,6 +40,7 @@ in
     # '')
     unstable.vivaldi
     unstable.vivaldi-ffmpeg-codecs
+    nixfmt
     # unstable.vscode.fhs
     # vscode
     # (
@@ -56,11 +55,10 @@ in
     #       # ms-vscode.powershell
     #       # ms-azuretools.vscode-docker
 
-
     #       # python related packages
     #       ms-python.python
     #       ms-python.vscode-pylance
-          
+
     #       # C++ related packages
     #       ms-vscode.cpptools
     #       ms-vscode.cmake-tools
@@ -109,25 +107,16 @@ in
     tray.enable = false;
   };
 
-  programs.fish = {
-    enable = true;
-    # interactiveShellInit = '''';
-    # loginShellInit = '''';
-  };
-
-  programs.direnv = {
-    enable = true;
-  };
-
-  programs.vscode = {
-    enable = true;
-    package = pkgs.vscode.fhs;
-  };
-
   programs = {
+    bash.enable = true;
+    direnv.enable = true;
+    fish.enable = true;
     gitui.enable = true;
-  }
-
+    vscode = {
+      enable = true;
+      package = pkgs.vscode.fhs;
+    };
+  };
 
   programs.ssh = {
     enable = true;
@@ -152,7 +141,7 @@ in
         user = "codeium";
       };
 
-    "ors-ftp3" = {
+      "ors-ftp3" = {
         hostname = "192.168.0.25";
         user = "root";
       };
@@ -181,13 +170,12 @@ in
         proxyJump = "vm-server2";
       };
 
-
       "vm-server2-license-server" = {
         hostname = "10.99.99.7";
         user = "user";
         proxyJump = "vm-server2";
       };
-      
+
       "vm-server2-keycloak" = {
         hostname = "10.99.99.8";
         user = "user";
@@ -196,18 +184,38 @@ in
     };
   };
 
-#  home.file.".config/fish/config.fish".text = ''
-## fish configuration added by home-manager
-#export MAMBA_ROOT_PREFIX=/home/eric/.config/mamba
-#if status is-interactive
-#  # Commands to run in interactive sessions can go here
-#
-#  export CONDA_EXE=$MAMBA_ROOT_PREFIX/bin/conda
-#  # This uses the type -q command to check if micromamba is in the PATH. If it is, it will run the eval command to set up the micromamba shell hook for fish. The -s fish part tells it to generate code for the fish shell.
-#  eval "$(micromamba shell hook -s fish)" 
-#  alias ca "python --version" 
-#end
-#'';
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    vimAlias = true;
+    defaultEditor = true;
+    coc = { enable = true; };
+    extraConfig = ''
+      set number relativenumber
+      nnoremap <C-t> :NERDTreeToggle<CR>
+      nnoremap <C-p> :FZF<CR>
+      set mouse=
+    '';
+
+    plugins = with pkgs.vimPlugins; [
+      vim-surround
+      vim-gitgutter
+      nerdtree
+      fzfWrapper
+    ];
+  };
+  #  home.file.".config/fish/config.fish".text = ''
+  ## fish configuration added by home-manager
+  #export MAMBA_ROOT_PREFIX=/home/eric/.config/mamba
+  #if status is-interactive
+  #  # Commands to run in interactive sessions can go here
+  #
+  #  export CONDA_EXE=$MAMBA_ROOT_PREFIX/bin/conda
+  #  # This uses the type -q command to check if micromamba is in the PATH. If it is, it will run the eval command to set up the micromamba shell hook for fish. The -s fish part tells it to generate code for the fish shell.
+  #  eval "$(micromamba shell hook -s fish)" 
+  #  alias ca "python --version" 
+  #end
+  #'';
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
@@ -222,25 +230,19 @@ in
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
-  } //
-  builtins.listToAttrs (map
-    (pkg:
-      {
-        name = ".config/autostart/" + pkg.pname + ".desktop";
-        value =
-          if pkg ? desktopItem then {
-            # Application has a desktopItem entry. 
-            # Assume that it was made with makeDesktopEntry, which exposes a
-            # text attribute with the contents of the .desktop file
-            text = pkg.desktopItem.text;
-          } else {
-            # Application does *not* have a desktopItem entry. Try to find a
-            # matching .desktop name in /share/apaplications
-            source = (pkg + "/share/applications/" + pkg.pname + ".desktop");
-          };
-      })
-    autostartPrograms);
-
+  } // builtins.listToAttrs (map (pkg: {
+    name = ".config/autostart/" + pkg.pname + ".desktop";
+    value = if pkg ? desktopItem then {
+      # Application has a desktopItem entry. 
+      # Assume that it was made with makeDesktopEntry, which exposes a
+      # text attribute with the contents of the .desktop file
+      text = pkg.desktopItem.text;
+    } else {
+      # Application does *not* have a desktopItem entry. Try to find a
+      # matching .desktop name in /share/apaplications
+      source = (pkg + "/share/applications/" + pkg.pname + ".desktop");
+    };
+  }) autostartPrograms);
 
   # You can also manage environment variables but you will have to manually
   # source
@@ -262,9 +264,7 @@ in
     enable = true;
     userName = "Eric Yen";
     userEmail = "eric@ericyen.com";
-    aliases = {
-      prettylog = "...";
-    };
+    aliases = { prettylog = "..."; };
     delta = {
       enable = true;
       options = {
@@ -274,54 +274,17 @@ in
       };
     };
     extraConfig = {
-      core = {
-        editor = "nvim";
-      };
-      color = {
-        ui = true;
-      };
-      push = {
-        default = "simple";
-      };
-      pull = {
-        ff = "only";
-      };
-      init = {
-        defaultBranch = "main";
-      };
+      core = { editor = "nvim"; };
+      color = { ui = true; };
+      push = { default = "simple"; };
+      pull = { ff = "only"; };
+      init = { defaultBranch = "main"; };
     };
     ignores = [
       ".DS_Store"
       "*.pyc"
-      "\..*swp" # swap files
+      "..*swp" # swap files
       "*.o"
-    ];
-  };
-
-  programs.bash = {
-    enable = true;
-  };
-  
-  programs.neovim = {
-    enable = true;
-    viAlias = true;
-    vimAlias = true;
-    defaultEditor = true;
-    coc = {
-       enable = true;
-    };
-    extraConfig = ''
-      set number relativenumber
-      nnoremap <C-t> :NERDTreeToggle<CR>
-      nnoremap <C-p> :FZF<CR>
-      set mouse=
-    '';
-
-    plugins = with pkgs.vimPlugins; [
-      vim-surround
-      vim-gitgutter
-      nerdtree
-      fzfWrapper
     ];
   };
 
