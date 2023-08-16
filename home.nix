@@ -2,6 +2,7 @@
 let
   # this will allow the unstable packages to use the same config as on the stable
   unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
+  autostartPrograms = [ pkgs.slack pkgs.zoom pkgs.vivaldi pkgs.thunderbird ]; 
 in 
 {
   # Home Manager needs a bit of information about you and the paths it should
@@ -44,49 +45,55 @@ in
     unstable.gitui
     # unstable.vscode.fhs
     # vscode
-    (
-      vscode-with-extensions.override 
-      {
-        vscodeExtensions = with unstable.vscode-extensions; 
-        [
+    # (
+    #   vscode-with-extensions.override 
+    #   {
+    #     vscodeExtensions = with unstable.vscode-extensions; 
+    #     [
 
-          # generatl development related packages
-          ms-vscode-remote.remote-ssh
-          eamodio.gitlens
-          # ms-vscode.powershell
-          # ms-azuretools.vscode-docker
+    #       # generatl development related packages
+    #       ms-vscode-remote.remote-ssh
+    #       eamodio.gitlens
+    #       # ms-vscode.powershell
+    #       # ms-azuretools.vscode-docker
 
 
-          # python related packages
-          ms-python.python
-          ms-python.vscode-pylance
+    #       # python related packages
+    #       ms-python.python
+    #       ms-python.vscode-pylance
           
-          # C++ related packages
-          ms-vscode.cpptools
-          ms-vscode.cmake-tools
-          xaver.clang-format
+    #       # C++ related packages
+    #       ms-vscode.cpptools
+    #       ms-vscode.cmake-tools
+    #       xaver.clang-format
 
-          # nix related packages
-          bbenoist.nix
-          arrterian.nix-env-selector
-          jnoortheen.nix-ide
-        ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace 
-        [
-          {
-            publisher = "mjcrouch";
-            name = "perforce";
-            version = "4.15.7";
-            sha256 = "sha256-BXBfxg2GrXvohvu2b02JqtxbGxPxSanNId6DQ39akHI=";
-          }
-          {
-            publisher = "ms-python";
-            name = "black-formatter";
-            version ="2023.5.12151008";
-            sha256 = "sha256-YBcyyE9Z2eL914J8I97WQW8a8A4Ue6C0pCUjWRRPcr8=";
-          }
-        ];
-      }
-    )
+    #       # nix related packages
+    #       bbenoist.nix
+    #       arrterian.nix-env-selector
+    #       jnoortheen.nix-ide
+    #     ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace 
+    #     [
+    #       {
+    #         publisher = "mjcrouch";
+    #         name = "perforce";
+    #         version = "4.15.7";
+    #         sha256 = "sha256-BXBfxg2GrXvohvu2b02JqtxbGxPxSanNId6DQ39akHI=";
+    #       }
+    #       {
+    #         publisher = "ms-python";
+    #         name = "black-formatter";
+    #         version ="2023.5.12151008";
+    #         sha256 = "sha256-YBcyyE9Z2eL914J8I97WQW8a8A4Ue6C0pCUjWRRPcr8=";
+    #       }
+    #       {
+    #         publisher = "Codeium";
+    #         name = "codeium-enterprise-updater";
+    #         version = "1.0.9";
+    #         sha256 = "sha256-WyDVhc9fjQ+Qgw7F04ESxicRK53vaVxgFtGRHQGpgeI=";
+    #       }
+    #     ];
+    #   }
+    # )
 
     unstable.rclone
     unstable.obsidian
@@ -98,10 +105,24 @@ in
     tmux
   ];
 
+  services.syncthing = {
+    enable = true;
+    tray.enable = false;
+  };
+
   programs.fish = {
     enable = true;
     # interactiveShellInit = '''';
     # loginShellInit = '''';
+  };
+
+  programs.direnv = {
+    enable = true;
+  };
+
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode.fhs;
   };
 
   programs.ssh = {
@@ -122,11 +143,52 @@ in
         user = "eric";
       };
 
-      "ors-ftp3" = {
+      "codeium" = {
+        hostname = "192.168.0.46";
+        user = "codeium";
+      };
+
+    "ors-ftp3" = {
         hostname = "192.168.0.25";
         user = "root";
       };
 
+      "vm-server2" = {
+        hostname = "131.153.203.129";
+        user = "proxmox";
+        proxyJump = "192.168.0.37";
+      };
+
+      "vm-server2-proxy" = {
+        hostname = "10.99.99.4";
+        user = "user";
+        proxyJump = "vm-server2";
+      };
+
+      "vm-server2-internal-infrastructure" = {
+        hostname = "10.99.99.5";
+        user = "user";
+        proxyJump = "vm-server2";
+      };
+
+      "vm-server2-mattermost" = {
+        hostname = "10.99.99.6";
+        user = "user";
+        proxyJump = "vm-server2";
+      };
+
+
+      "vm-server2-license-server" = {
+        hostname = "10.99.99.7";
+        user = "user";
+        proxyJump = "vm-server2";
+      };
+      
+      "vm-server2-keycloak" = {
+        hostname = "10.99.99.8";
+        user = "user";
+        proxyJump = "vm-server2";
+      };
     };
   };
 
@@ -156,7 +218,25 @@ in
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
-  };
+  } //
+  builtins.listToAttrs (map
+    (pkg:
+      {
+        name = ".config/autostart/" + pkg.pname + ".desktop";
+        value =
+          if pkg ? desktopItem then {
+            # Application has a desktopItem entry. 
+            # Assume that it was made with makeDesktopEntry, which exposes a
+            # text attribute with the contents of the .desktop file
+            text = pkg.desktopItem.text;
+          } else {
+            # Application does *not* have a desktopItem entry. Try to find a
+            # matching .desktop name in /share/apaplications
+            source = (pkg + "/share/applications/" + pkg.pname + ".desktop");
+          };
+      })
+    autostartPrograms);
+
 
   # You can also manage environment variables but you will have to manually
   # source
@@ -215,7 +295,7 @@ in
   };
 
   programs.bash = {
-    enable = false;
+    enable = true;
   };
   
   programs.neovim = {
@@ -230,9 +310,9 @@ in
       set number relativenumber
       nnoremap <C-t> :NERDTreeToggle<CR>
       nnoremap <C-p> :FZF<CR>
-      set shell=/bin/bash
       set mouse=
     '';
+
     plugins = with pkgs.vimPlugins; [
       vim-surround
       vim-gitgutter
@@ -243,4 +323,5 @@ in
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
 }
