@@ -1,9 +1,10 @@
 { config, pkgs, lib, ... }:
 let
   # this will allow the unstable packages to use the same config as on the stable
-  unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
+  #unstable = import <nixos-unstable> { config = config.nixpkgs.config; };
   autostartPrograms = [ pkgs.slack pkgs.zoom pkgs.vivaldi pkgs.thunderbird ];
-in {
+in
+{
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "eric";
@@ -38,8 +39,8 @@ in {
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')
-    unstable.vivaldi
-    unstable.vivaldi-ffmpeg-codecs
+    vivaldi
+    vivaldi-ffmpeg-codecs
     nixfmt
     # unstable.vscode.fhs
     # vscode
@@ -92,10 +93,10 @@ in {
     #   }
     # )
 
-    unstable.rclone
-    unstable.obsidian
-    unstable.nextcloud-client
-    # unstable.viber
+    rclone
+    obsidian
+    nextcloud-client
+    # viber
     btop
     dua
     byobu
@@ -230,19 +231,22 @@ in {
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
-  } // builtins.listToAttrs (map (pkg: {
-    name = ".config/autostart/" + pkg.pname + ".desktop";
-    value = if pkg ? desktopItem then {
-      # Application has a desktopItem entry. 
-      # Assume that it was made with makeDesktopEntry, which exposes a
-      # text attribute with the contents of the .desktop file
-      text = pkg.desktopItem.text;
-    } else {
-      # Application does *not* have a desktopItem entry. Try to find a
-      # matching .desktop name in /share/apaplications
-      source = (pkg + "/share/applications/" + pkg.pname + ".desktop");
-    };
-  }) autostartPrograms);
+  } // builtins.listToAttrs (map
+    (pkg: {
+      name = ".config/autostart/" + pkg.pname + ".desktop";
+      value =
+        if pkg ? desktopItem then {
+          # Application has a desktopItem entry. 
+          # Assume that it was made with makeDesktopEntry, which exposes a
+          # text attribute with the contents of the .desktop file
+          text = pkg.desktopItem.text;
+        } else {
+          # Application does *not* have a desktopItem entry. Try to find a
+          # matching .desktop name in /share/apaplications
+          source = (pkg + "/share/applications/" + pkg.pname + ".desktop");
+        };
+    })
+    autostartPrograms);
 
   # You can also manage environment variables but you will have to manually
   # source
