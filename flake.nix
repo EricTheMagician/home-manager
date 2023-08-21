@@ -19,7 +19,8 @@
 
     };
 
-  outputs = inputs @ { self, nixpkgs, home-manager }:
+  outputs =  { self, nixpkgs, home-manager, 
+  }:
     let
       username = "eric";
       homeDirectory = "/home/${username}";
@@ -40,7 +41,7 @@
 
     in
     {
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
 
 
       homeConfigurations.eric = home-manager.lib.homeManagerConfiguration {
@@ -49,13 +50,13 @@
 
         modules = [
           ./home.nix
-          #    {
-          #      home = {
-          #        username = username;
-          #        homeDirectory = homeDirectory;
-          #        stateVersion = "23.05";
-          #      };
-          #    }
+              {
+          home = {
+                  username = username;
+                  homeDirectory = homeDirectory;
+                  # stateVersion = "23.05";
+                };
+              }
         ];
       };
 
