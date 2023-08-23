@@ -113,6 +113,10 @@ in
     direnv.enable = true;
     fish.enable = true;
     gitui.enable = true;
+    # Let Home Manager install and manage itself.
+    home-manager.enable = true;
+    # enable ripgrep
+    ripgrep.enable = true; # rg command
     vscode = {
       enable = true;
       package = pkgs.vscode.fhs;
@@ -320,8 +324,5 @@ in
       "*.o"
     ];
   };
-
-  # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
 
 }
